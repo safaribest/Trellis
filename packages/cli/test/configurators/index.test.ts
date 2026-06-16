@@ -318,6 +318,8 @@ describe("collectPlatformTemplates", () => {
     copilot: ".github/skills",
     droid: ".factory/skills",
     pi: ".pi/skills",
+    reasonix: ".reasonix/skills",
+    grok: ".grok/skills",
   };
 
   it("does not throw for any platform", () => {

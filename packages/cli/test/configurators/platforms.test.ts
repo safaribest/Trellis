@@ -20,6 +20,7 @@ import {
   getHooksConfig as getCopilotHooksConfig,
 } from "../../src/templates/copilot/index.js";
 import { getHooksConfig as getCursorHooksConfig } from "../../src/templates/cursor/index.js";
+import { getHooksConfig as getGrokHooksConfig } from "../../src/templates/grok/index.js";
 import {
   getAllAgents as getPiAgents,
   getExtensionTemplate as getPiExtensionTemplate,
@@ -160,6 +161,12 @@ describe("getConfiguredPlatforms", () => {
     fs.mkdirSync(path.join(tmpDir, ".pi"));
     const result = getConfiguredPlatforms(tmpDir);
     expect(result.has("pi")).toBe(true);
+  });
+
+  it("detects .grok directory as grok", () => {
+    fs.mkdirSync(path.join(tmpDir, ".grok"));
+    const result = getConfiguredPlatforms(tmpDir);
+    expect(result.has("grok")).toBe(true);
   });
 
   it("detects multiple platforms simultaneously", () => {
@@ -983,6 +990,57 @@ describe("configurePlatform", () => {
     };
 
     expect(hooksConfig.hooks.preToolUse[0].matcher).toBe("Task|Subagent");
+  });
+
+  it("configurePlatform('grok') creates skills, roles, agents, and hooks", async () => {
+    await configurePlatform("grok", tmpDir);
+
+    expect(
+      fs.existsSync(path.join(tmpDir, ".grok", "skills", "trellis-brainstorm", "SKILL.md")),
+    ).toBe(true);
+    expect(
+      fs.existsSync(path.join(tmpDir, ".grok", "skills", "trellis-finish-work", "SKILL.md")),
+    ).toBe(true);
+    expect(
+      fs.existsSync(path.join(tmpDir, ".grok", "agents", "trellis-implement.md")),
+    ).toBe(true);
+    expect(
+      fs.existsSync(path.join(tmpDir, ".grok", "roles", "trellis-implement.toml")),
+    ).toBe(true);
+    expect(fs.existsSync(path.join(tmpDir, ".grok", "hooks", "trellis.json"))).toBe(
+      true,
+    );
+    expect(
+      fs.existsSync(path.join(tmpDir, ".grok", "hooks", "session-start.py")),
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(tmpDir, ".grok", "skills", "trellis-check", "SKILL.md"),
+      ),
+    ).toBe(false);
+  });
+
+  it("grok hooks.json matches Grok and Claude subagent tool names", () => {
+    const hooksConfig = JSON.parse(getGrokHooksConfig()) as {
+      hooks: { PreToolUse: { matcher: string }[] };
+    };
+
+    expect(hooksConfig.hooks.PreToolUse[0].matcher).toBe(
+      "Task|spawn_subagent|Subagent",
+    );
+  });
+
+  it("collectPlatformTemplates('grok') maps skills, roles, agents, and hooks", () => {
+    const templates = collectPlatformTemplates("grok");
+    expect(templates).toBeInstanceOf(Map);
+    expect(templates?.get(".grok/skills/trellis-finish-work/SKILL.md")).toBeDefined();
+    expect(templates?.get(".grok/roles/trellis-implement.toml")).toContain(
+      'prompt_file = ".grok/agents/trellis-implement.md"',
+    );
+    expect(templates?.get(".grok/hooks/trellis.json")).toBe(
+      resolvePlaceholders(getGrokHooksConfig()),
+    );
+    expect(templates?.get(".grok/hooks/inject-subagent-context.py")).toBeDefined();
   });
 
   it("collectPlatformTemplates('copilot') includes tracked + discovery hooks config", () => {

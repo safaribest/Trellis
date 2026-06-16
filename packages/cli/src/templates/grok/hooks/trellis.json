@@ -1,0 +1,48 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PYTHON_CMD}} .grok/hooks/session-start.py",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Task|spawn_subagent|Subagent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PYTHON_CMD}} .grok/hooks/inject-subagent-context.py",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|run_terminal_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PYTHON_CMD}} .grok/hooks/inject-shell-session-context.py",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{PYTHON_CMD}} .grok/hooks/inject-workflow-state.py",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

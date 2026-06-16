@@ -75,16 +75,17 @@ describe("shared-hooks capability table", () => {
     expect(SHARED_HOOKS_BY_PLATFORM.copilot).not.toContain("session-start.py");
   });
 
-  it("inject-shell-session-context.py goes to Cursor only", () => {
+  it("inject-shell-session-context.py goes to shell-bridge platforms only", () => {
+    const shellBridgePlatforms = new Set(["cursor", "grok"]);
     for (const [platform, hooks] of Object.entries(
       SHARED_HOOKS_BY_PLATFORM,
     )) {
       const has = hooks.includes("inject-shell-session-context.py");
-      if (platform === "cursor") expect(has).toBe(true);
+      if (shellBridgePlatforms.has(platform)) expect(has).toBe(true);
       else
         expect(
           has,
-          `${platform} declares inject-shell-session-context.py but does not use Cursor beforeShellExecution`,
+          `${platform} declares inject-shell-session-context.py but is not a shell-bridge platform`,
         ).toBe(false);
     }
   });

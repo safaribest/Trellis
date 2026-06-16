@@ -22,7 +22,8 @@ export type AITool =
   | "copilot"
   | "droid"
   | "pi"
-  | "reasonix";
+  | "reasonix"
+  | "grok";
 
 /**
  * Template directory categories
@@ -43,7 +44,8 @@ export type TemplateDir =
   | "copilot"
   | "droid"
   | "pi"
-  | "reasonix";
+  | "reasonix"
+  | "grok";
 
 /**
  * CLI flag names for platform selection (e.g., --claude, --cursor, --kilo, --kiro, --gemini, --antigravity)
@@ -64,7 +66,8 @@ export type CliFlag =
   | "copilot"
   | "droid"
   | "pi"
-  | "reasonix";
+  | "reasonix"
+  | "grok";
 
 /**
  * Template context for placeholder resolution.
@@ -384,6 +387,22 @@ export const AI_TOOLS: Record<AITool, AIToolConfig> = {
       agentCapable: true,
       hasHooks: false,
       cliFlag: "reasonix",
+    },
+  },
+  grok: {
+    name: "Grok Build",
+    templateDirs: ["common", "grok"],
+    configDir: ".grok",
+    cliFlag: "grok",
+    defaultChecked: false,
+    hasPythonHooks: true,
+    templateContext: {
+      cmdRefPrefix: "/trellis-",
+      executorAI: "Bash scripts or tool calls",
+      userActionLabel: "Skills",
+      agentCapable: true,
+      hasHooks: true,
+      cliFlag: "grok",
     },
   },
 };
